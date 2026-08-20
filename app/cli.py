@@ -15,28 +15,30 @@ from app.db.connection import close_pool, execute  # noqa: E402
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="app.cli",
-        description="AI Marketing Copilot (Agent Copy Writer) - pipeline konten promo.",
+        description="AI Marketing Copilot (Agent Copy Writer) - promo content pipeline.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("init-db", help="Buat skema tabel (idempotent) dari app/db/schema.sql")
+    sub.add_parser("init-db", help="Create the table schema (idempotent) from app/db/schema.sql")
 
-    seed_parser = sub.add_parser("seed", help="Isi dummy data deterministic")
+    seed_parser = sub.add_parser("seed", help="Fill deterministic dummy data")
     seed_parser.add_argument(
-        "--force", action="store_true", help="Hapus data lama lalu isi ulang"
+        "--force", action="store_true", help="Delete existing data, then reseed"
     )
 
-    trigger_parser = sub.add_parser("trigger", help="Jalankan pipeline copywriter -> reviewer -> kirim")
+    trigger_parser = sub.add_parser(
+        "trigger", help="Run the copywriter -> reviewer -> delivery pipeline"
+    )
     trigger_parser.add_argument(
         "--slot",
         choices=list(VALID_SLOTS),
-        default="siang",
-        help="Slot prime time (mempengaruhi label & nuansa konten)",
+        default="morning",
+        help="Prime-time slot (affects the title label and content nuance)",
     )
     trigger_parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Cetak hasil ke terminal + simpan outputs/ tanpa kirim Telegram",
+        help="Print the result to the terminal and save outputs/ without sending Telegram",
     )
     return parser
 
@@ -45,7 +47,7 @@ async def _cmd_init_db() -> None:
     schema_path = PROJECT_ROOT / "app" / "db" / "schema.sql"
     sql = schema_path.read_text(encoding="utf-8")
     await execute(sql)
-    print(f"[OK] Skema diterapkan dari {schema_path.name} (idempotent).")
+    print(f"[OK] Schema applied from {schema_path.name} (idempotent).")
 
 
 async def _cmd_seed(force: bool) -> None:
@@ -55,7 +57,7 @@ async def _cmd_seed(force: bool) -> None:
 
     result = await seed(force=force)
     if result.get("skipped"):
-        print(f"[SKIP] {result['reason']} ({result['existing']} SKU sudah ada).")
+        print(f"[SKIP] {result['reason']} ({result['existing']} SKUs already present).")
         return
     rows = [
         [
@@ -70,13 +72,13 @@ async def _cmd_seed(force: bool) -> None:
     print(
         tabulate(
             rows,
-            headers=["SKU Code", "Product", "Harga", "Diskon", "Stok"],
+            headers=["SKU Code", "Product", "Price", "Discount", "Stock"],
             tablefmt="github",
         )
     )
     print(
-        f"[OK] Seed selesai: {result['inventory']} SKU, "
-        f"{result['orders']} order, {result['reviews']} review."
+        f"[OK] Seed complete: {result['inventory']} SKUs, "
+        f"{result['orders']} orders, {result['reviews']} reviews."
     )
 
 
@@ -86,11 +88,11 @@ async def _cmd_trigger(slot: str, dry_run: bool) -> None:
     try:
         result = await run_pipeline(slot=slot, dry_run=dry_run)
     except Exception as exc:
-        print(f"[ERROR] Pipeline gagal: {exc}", file=sys.stderr)
+        print(f"[ERROR] Pipeline failed: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc
 
     print(f"\n[OK] Approved={result['approved']} | rounds={result['review_rounds']}")
-    print(f"[OK] Deliver: {result['delivered_to']} | arsip: {result['output_path']}")
+    print(f"[OK] Delivered: {result['delivered_to']} | archive: {result['output_path']}")
 
     if dry_run:
         banner = "\u2501" * 60
@@ -119,7 +121,7 @@ def main() -> None:
     for stream in (sys.stdout, sys.stderr):
         try:
             stream.reconfigure(encoding="utf-8", errors="replace")
-        except Exception:  # pragma: no cover - stream tanpa reconfigure (mis. test runner)
+        except Exception:  # pragma: no cover - stream without reconfigure (e.g. test runner)
             pass
     asyncio.run(
         _main(),

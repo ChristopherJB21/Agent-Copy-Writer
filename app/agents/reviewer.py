@@ -11,8 +11,8 @@ from app.config import settings
 from app.data.brand_profile import BRAND_PROFILE
 
 JSON_SCHEMA_HINT = (
-    '{"approved": false, "score": 70, "feedback": "Perbaiki CTA dan pastikan '
-    'angka stok/diskon persis sama dengan data", "revised": null}'
+    '{"approved": false, "score": 70, "feedback": "Fix the CTA and make sure the '
+    'stock/discount figures match the data exactly", "revised": null}'
 )
 
 
@@ -23,56 +23,56 @@ def _context_json(context: dict[str, Any]) -> str:
 def build_review_prompt(draft: str, context: dict[str, Any]) -> str:
     brand = BRAND_PROFILE
     return f"""
-Kamu adalah REVIEWER yang output-nya HANYA satu objek JSON. DILARANG menulis kalimat
-pengantar, proses berpikir, analisis, penjelasan, atau markdown fence. Tidak ada pengecualian.
-Jangan menyalin contoh JSON di bawah ke dalam pikiranmu - langsung balas penilaian asli.
+You are a REVIEWER whose output is ONLY a single JSON object. Never write an intro,
+chain-of-thought, analysis, explanation, or markdown fences. No exceptions.
+Do not echo the example JSON below - reply directly with your actual assessment.
 
-# DATA FAKTUAL (satu-satunya acuan kebenaran angka)
+# FACTUAL DATA (the only reference for correct figures)
 {_context_json(context)}
 
-# GAYA BRAND
+# BRAND STYLE
 - Tone: {brand['tone']}
-- Aturan klaim: {brand['promo_rule']}
+- Claim rule: {brand['promo_rule']}
 
-# DRAFT KANDIDAT YANG DINILAI
+# DRAFT CANDIDATE TO REVIEW
 {draft}
 
-# KRITERIA PENILAIAN (skor 1-100)
-1. Hook strength (apakah hook 3 detik cukup kuat & relevan dengan data)
-2. Akurasi angka: SEMUA klaim stok, diskon, rating, jumlah order harus persis sama
-   dengan DATA FAKTUAL. TEMUAN angka yang tidak sesuai data = hallucination -> false.
-3. Brand tone: bahasa Indonesia natural, gaya casual tapi sopan, CTA sesuai channel.
-4. Kesesuaian format: ada [Visual]/[Hook]/[Body]/[CTA], kutipan testimoni, bullet
-   dengan emoji, hashtag, broadcast < 50 kata.
+# SCORING CRITERIA (score 1-100)
+1. Hook strength (is the 3-second hook strong and relevant to the data?)
+2. Figure accuracy: EVERY stock, discount, rating, and order-count claim must exactly match
+   the FACTUAL DATA. Any figure that does not match = hallucination -> must be rejected.
+3. Brand tone: natural English, casual yet polite, channel-appropriate CTA.
+4. Format compliance: [Visual]/[Hook]/[Body]/[CTA] present, testimonial quote, bullet
+   with emoji, hashtags, and a broadcast under 50 words.
 
-# OUTPUT (WAJIB: satu objek JSON murni BERPOLA seperti contoh, TANPA teks lain)
+# OUTPUT (REQUIRED: a single pure JSON object modeled on the example, with no other text)
 {JSON_SCHEMA_HINT}
 
-Catatan value:
-- "approved": true hanya jika SEMUA kriteria lolos TANPA hallucination angka.
+Value notes:
+- "approved": true only if ALL criteria pass with NO figure hallucination. Otherwise false.
 - "score": int 1-100.
-- "feedback": 1-3 kalimat konkret bahasa Indonesia, apa yang perlu diperbaiki.
-- "revised": draft revisi LENGKAP 3 format (marker [TIKTOK]/[FEED]/[BROADCAST]) bila
-  perlu perbaikan; jika "approved": true, isi null.
+- "feedback": 1-3 concrete sentences in English describing what to fix.
+- "revised": the FULL revised draft with all 3 formats (markers [TIKTOK]/[FEED]/[BROADCAST])
+  when fixes are needed; set to null when "approved" is true.
 """.strip()
 
 
 def build_retry_review_prompt(draft: str, context: dict[str, Any], previous_raw: str) -> str:
     return f"""
-Jawaban reviewer sebelumnya TIDAK VALID karena bukan objek JSON murni.
-Jawaban lama (abaikan, jangan diulang): {previous_raw[:400]}
+The previous reviewer response was INVALID because it was not a pure JSON object.
+Previous response (ignore it, do not repeat): {previous_raw[:400]}
 
-# TUGAS SEKARANG
-Balas HANYA satu objek JSON berpola seperti ini, TANPA apa pun di luarnya:
+# TASK NOW
+Reply with ONLY a single JSON object modeled on this example, with nothing else:
 {JSON_SCHEMA_HINT}
 
-# DRAFT YANG DINILAI
+# DRAFT TO REVIEW
 {draft}
 
-# DATA FAKTUAL
+# FACTUAL DATA
 {_context_json(context)}
 
-# JANGAN TULIS TEKS APA PUN, BAHKAN PROSES BERPIKIR, SELAIN OBJEK JSON.
+# DO NOT WRITE ANYTHING OTHER THAN THE JSON OBJECT - NOT EVEN CHAIN-OF-THOUGHT.
 """.strip()
 
 
@@ -81,18 +81,18 @@ def build_reviewer_agent() -> Agent:
         name="reviewer",
         model=build_llm(settings),
         instruction=(
-            "Kamu adalah reviewer ketat konten marketing. Output mu HANYA satu objek JSON: "
+            "You are a strict marketing content reviewer. Your output is ONLY a JSON object: "
             '{"approved": bool, "score": int, "feedback": str, "revised": str|null}. '
-            "Evaluasi akurasi angka terhadap data dan kualitas hook/tone/format."
+            "Evaluate figure accuracy against the data and hook/tone/format quality."
         ),
     )
 
 
 def extract_json_object(text: str) -> dict[str, Any]:
-    """Ambil objek JSON terakhir yang valid dalam teks.
+    """Extract the LAST valid JSON object from a text.
 
-    Toleran terhadap proses berpikir/teks lain: mencoba setiap kemunculan '{'
-    dengan json.JSONDecoder.raw_decode dan memakai hasil valid TERAKHIR.
+    Tolerant of chain-of-thought / surrounding text: tries every "{" occurrence with
+    json.JSONDecoder.raw_decode and keeps the last valid result.
     """
     decoder = json.JSONDecoder()
     valid_objects: list[dict[str, Any]] = []
@@ -109,12 +109,12 @@ def extract_json_object(text: str) -> dict[str, Any]:
             pass
         start = idx + 1
     if not valid_objects:
-        raise ValueError(f"Reviewer tidak membalas JSON yang valid: {text[:300]!r}")
+        raise ValueError(f"Reviewer did not return valid JSON: {text[:300]!r}")
     return valid_objects[-1]
 
 
 def parse_review_json(text: str) -> dict[str, Any]:
-    """Normalisasi jawaban reviewer menjadi dict dengan key baku."""
+    """Normalize a reviewer response into a dict with canonical keys."""
     cleaned = text.strip()
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```[a-zA-Z]*\s*", "", cleaned)
@@ -124,7 +124,7 @@ def parse_review_json(text: str) -> dict[str, Any]:
     payload.setdefault("score", 0)
     payload.setdefault("feedback", "")
     payload.setdefault("revised", None)
-    # Koersi agar "approved" bertipe bool walaupun model mengirim string ("true"/"yes").
+    # Coerce so that "approved" is a bool even if the model sends a string ("true"/"yes").
     raw_approved = payload["approved"]
     payload["approved"] = str(raw_approved).strip().lower() in ("true", "1", "yes", "ya")
     return payload
@@ -133,7 +133,7 @@ def parse_review_json(text: str) -> dict[str, Any]:
 async def review_draft(
     agent: Agent, draft: str, context: dict[str, Any], session_id: str
 ) -> dict[str, Any]:
-    """Minta penilaian reviewer; bila jawaban bukan JSON, minta ulang 1x."""
+    """Request a review; when the response is not JSON, ask once more (1 retry)."""
     raw = await run_agent(agent, build_review_prompt(draft, context), session_id=session_id)
     try:
         return parse_review_json(raw)

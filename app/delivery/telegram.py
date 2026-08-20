@@ -10,7 +10,7 @@ from app.config import settings
 
 
 def save_output(text: str, slot: str) -> Path:
-    """Simpan salinan pesan final ke outputs/ (dipakai dry-run & arsip tiap trigger)."""
+    """Save a copy of the final message to outputs/ (used by dry-run and as archive)."""
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     settings.outputs_dir.mkdir(parents=True, exist_ok=True)
     path = settings.outputs_dir / f"{stamp}_{slot}.txt"

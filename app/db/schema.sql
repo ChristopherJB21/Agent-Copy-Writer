@@ -1,6 +1,6 @@
--- Schema idempotent MVP AI Marketing Copilot (3 tabel + brand profile sebagai config file)
--- Catatan: kolom discount_pct ditambahkan agar angka promo "diskon 30%" pada contoh
--- blueprint dapat disimpan & direview berdasarkan data (bukan dibuat-buat LLM).
+-- Idempotent schema for the AI Marketing Copilot MVP (3 tables; brand profile lives in a config file)
+-- Note: the inventory.discount_pct column was added so promo figures (e.g. a "30% discount") are
+-- stored and reviewable based on data rather than invented by the LLM.
 
 CREATE TABLE IF NOT EXISTS inventory (
     sku_id        SERIAL PRIMARY KEY,

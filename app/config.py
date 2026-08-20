@@ -11,7 +11,7 @@ load_dotenv()
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 
-VALID_SLOTS = ("siang", "sore", "malam")
+VALID_SLOTS = ("morning", "evening", "night")
 
 DEFAULT_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/marketing_copilot"
 
@@ -53,9 +53,9 @@ def load_settings() -> Settings:
         telegram_chat_id=_env("TELEGRAM_CHAT_ID"),
         telegram_parse_mode=_env("TELEGRAM_PARSE_MODE"),
         slot_labels={
-            "siang": _env("PRIME_TIME_SIANG", "SIANG"),
-            "sore": _env("PRIME_TIME_SORE", "SORE"),
-            "malam": _env("PRIME_TIME_MALAM", "MALAM"),
+            "morning": _env("PRIME_TIME_MORNING", "MORNING"),
+            "evening": _env("PRIME_TIME_EVENING", "EVENING"),
+            "night": _env("PRIME_TIME_NIGHT", "NIGHT"),
         },
         outputs_dir=OUTPUTS_DIR,
     )

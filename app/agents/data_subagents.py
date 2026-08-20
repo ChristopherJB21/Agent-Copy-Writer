@@ -1,5 +1,5 @@
-"""Sub-agents data: 3 fungsi SQL (bukan agent LLM) yang menghasilkan context dict
-untuk diinjeksi ke prompt copywriter & reviewer (lightweight context injection)."""
+"""Data sub-agents: 3 SQL functions (not LLM agents) that produce a context dict
+injected into the copywriter and reviewer prompts (lightweight context injection)."""
 
 from __future__ import annotations
 
@@ -79,12 +79,12 @@ RATING_SQL = """
 
 
 async def get_sales_velocity() -> list[dict[str, Any]]:
-    """Sub-agent 1: SKU dengan order terbanyak 24 jam / 7 hari terakhir (efek FOMO)."""
+    """Sub-agent 1: SKUs with the most orders in the last 24h / 7 days (FOMO effect)."""
     return await fetch_all(SALES_VELOCITY_SQL)
 
 
 async def get_deadstock() -> list[dict[str, Any]]:
-    """Sub-agent 2: SKU menumpuk (stok tinggi, listed >30 hari, order 7 hari rendah)."""
+    """Sub-agent 2: SKUs piling up (high stock, listed > 30 days ago, low 7-day orders)."""
     return await fetch_all(
         DEADSTOCK_SQL,
         (DEADSTOCK_MIN_STOCK, DEADSTOCK_MIN_AGE_DAYS, DEADSTOCK_MAX_ORDERS_7D),
@@ -92,7 +92,7 @@ async def get_deadstock() -> list[dict[str, Any]]:
 
 
 async def get_social_proof(sku_id: int) -> list[dict[str, Any]]:
-    """Sub-agent 3: 3 review bintang 5 terbaru untuk SKU target."""
+    """Sub-agent 3: 3 most recent 5-star reviews for the target SKU."""
     return await fetch_all(SOCIAL_PROOF_SQL, (sku_id,))
 
 
@@ -110,7 +110,7 @@ def _to_number(value: Any) -> int | float:
 
 
 async def build_context() -> dict[str, Any]:
-    """Susun context JSON lengkap: velocity + deadstock + social proof + SKU primary."""
+    """Assemble the full context JSON: velocity + deadstock + social proof + primary SKU."""
     velocity, deadstock = await _run_queries()
     primary, reviews, rating = await _select_primary(deadstock, velocity)
     return {
@@ -135,15 +135,16 @@ async def _run_queries() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
 async def _select_primary(
     deadstock: list[dict[str, Any]], velocity: list[dict[str, Any]]
 ) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
-    """Prioritas: deadstock sebagai target promo (sesuai contoh blueprint),
-    fallback ke SKU terlaris bila tidak ada deadstock."""
+    """Deadstock is the promo target by default (as in the blueprint example);
+    fall back to the top seller when there is no deadstock."""
     if deadstock:
         primary = deadstock[0]
     elif velocity:
         primary = velocity[0]
     else:
         raise RuntimeError(
-            "Tidak ada SKU target: tabel inventory kosong. Jalankan dulu 'uv run python -m app.cli seed'."
+            "No target SKU: the inventory table is empty. "
+            "Run 'uv run python -m app.cli seed' first."
         )
 
     reviews = await get_social_proof(_to_number(primary["sku_id"]))

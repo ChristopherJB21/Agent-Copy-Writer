@@ -8,3 +8,4 @@ tabulate
 
 # Dev
 ruff
+black

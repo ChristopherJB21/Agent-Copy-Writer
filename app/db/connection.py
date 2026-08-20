@@ -11,7 +11,7 @@ from app.config import settings
 
 
 class DbPool:
-    """Pool koneksi async minimal berbasis asyncio.Queue (tanpa dependency ekstra)."""
+    """Minimal async connection pool based on asyncio.Queue (no extra dependencies)."""
 
     def __init__(self, conninfo: str, min_size: int = 1, max_size: int = 5) -> None:
         self._conninfo = conninfo
@@ -42,7 +42,7 @@ class DbPool:
     def release(self, conn: psycopg.AsyncConnection) -> None:
         try:
             self._queue.put_nowait(conn)
-        except asyncio.QueueFull:  # pragma: no cover - jalur safety pool penuh
+        except asyncio.QueueFull:  # pragma: no cover - pool full safety path
             self._schedule_close(conn)
 
     def _schedule_close(self, conn: psycopg.AsyncConnection) -> None:

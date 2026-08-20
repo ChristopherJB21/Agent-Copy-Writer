@@ -1,31 +1,29 @@
-from __future__ import annotations
+"""Brand Voice Guide: store profile as a config file (not a table, per MVP decision).
 
-"""Brand Voice Guide: profil toko sebagai config file (bukan tabel, hasil keputusan MVP).
-
-Diinjeksi ke prompt copywriter & reviewer agar gaya bahasa konsisten dengan brand.
+Injected into the copywriter and reviewer prompts so the tone stays consistent with the brand.
 """
 
 BRAND_PROFILE: dict = {
     "store_name": "Reswara Fashion",
     "tone": (
-        "Casual, hangat, enerjik, bahasa Indonesia sehari-hari yang tidak kaku "
-        "tapi tetap sopan. Hindari kalimat terlalu formal/kaku (mis. 'dengan ini kami informasikan')."
+        "Casual, warm, energetic, everyday English that is not stiff but still polite. "
+        "Avoid overly formal wording."
     ),
-    "audience": "Anak muda & pekerja usia 20-35 yang cari outfit nyaman untuk kerja/hangout.",
-    "primary_products": ["Kemeja", "Kaos", "Celana", "Dress", "Outerwear"],
+    "audience": "Young adults and professionals aged 20-35 looking for comfortable outfits for work or hanging out.",
+    "primary_products": ["Shirts", "Tees", "Pants", "Dresses", "Outerwear"],
     "cta_rules": (
-        "CTA harus langsung dan spesifik ke channel: video -> 'klik keranjang kuning', "
-        "feed -> 'tap link di bio', broadcast -> 'klik link di chat / link produk'."
+        "The CTA must be direct and channel-specific: video -> 'tap the yellow cart', "
+        "feed -> 'tap the link in bio', broadcast -> 'click the link in chat / product link'."
     ),
-    "hashtags": ["#OOTDIndo", "#FashionUMKM", "#LocalBrand", "#KemejaLinen", "#ClearanceSale"],
-    "product_link_placeholder": "[Link Produk]",
+    "hashtags": ["#OOTD", "#Fashion", "#LocalBrand", "#LinenShirt", "#ClearanceSale"],
+    "product_link_placeholder": "[Product Link]",
     "promo_rule": (
-        "Setiap klaim promo/stok WAJIB berasal dari data yang diberikan (stok, diskon, "
-        "rating, testimoni, jumlah order). Dilarang membuat angka sendiri (anti-hallucination)."
+        "Every promo/stock claim MUST come from the given data (stock, discount, rating, "
+        "testimonial, order counts). Fabricating numbers is forbidden (anti-hallucination)."
     ),
     "forbidden": [
-        "klaim angka promo/stok yang tidak ada di data",
-        "klaim '-100%' atau 'gratis semua' tanpa data",
-        "overclaim bahan (mis. 'anti luntur selamanya') tanpa bukti",
+        "claiming promo numbers / stock figures that are not in the data",
+        "claims like '-100%' or 'everything free' without data",
+        "overclaiming fabric properties (e.g. 'never fades, forever') without evidence",
     ],
 }

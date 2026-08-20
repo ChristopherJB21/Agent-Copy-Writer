@@ -17,29 +17,29 @@ def _context_json(context: dict[str, Any]) -> str:
 
 
 def _marker_example() -> str:
-    return """Contoh layout output (WAJIB persis; section video minimal berisi 4 baris marker):
+    return """Example layout (use it EXACTLY; the video section must have the 4 marker lines):
 [TIKTOK]
-[Visual: deskripsi visual singkat]
-[Hook (0-3s)]: kalimat hook
-[Body (4-12s)]: kalimat body dengan angka dari data
-[CTA (13-15s)]: kalimat call-to-action
+[Visual: brief visual description]
+[Hook (0-3s)]: hook sentence
+[Body (4-12s)]: body sentences with figures from the data
+[CTA (13-15s)]: call-to-action sentence
 
 [FEED]
-"kutipan testimoni" - Ulasan pembeli.
-Paragraf storytelling
-Bullet info stok
-Bullet info diskon
-CTA + hashtag
+"customer testimonial" - Buyer review.
+Storytelling paragraph
+Stock info bullet
+Discount info bullet
+CTA + hashtags
 
 [BROADCAST]
-pesan broadcast kurang dari 50 kata""".strip()
+broadcast message under 50 words, without hashtags""".strip()
 
 
 def _anti_noise() -> str:
     return (
-        "DILARANG menulis proses berpikir, verifikasi, pengecekan ulang, kata pengantar, "
-        "ajakan ('mari tulis'), atau teks selain blok marker. Karakter pertama jawabanmu "
-        "HARUS [TIKTOK]. Tidak boleh ada teks setelah blok [BROADCAST]."
+        "FORBIDDEN to write any chain-of-thought, self-verification, preamble, or texts like "
+        "('let me write'). The first character of your answer MUST be [TIKTOK]. "
+        "There must be no text after the [BROADCAST] block."
     )
 
 
@@ -47,28 +47,30 @@ def build_copywriter_prompt(context: dict[str, Any], slot: str, extra: str = "")
     slot_label = settings.slot_label(slot)
     brand = BRAND_PROFILE
     return f"""
-Kamu adalah copywriter senior e-commerce fashion Indonesia untuk brand "{brand['store_name']}".
+You are a senior e-commerce fashion copywriter for the brand "{brand['store_name']}".
 
-# DATA PENGGERAK (SATU-SATUNYA sumber angka & klaim promo)
+# DRIVING DATA (the ONLY source of figures & promo claims)
 {_context_json(context)}
 
-# PANDUAN GAYA BRAND
+# BRAND STYLE GUIDE
 - Tone: {brand['tone']}
 - Audience: {brand['audience']}
 - CTA: {brand['cta_rules']}
-- Link produk selalu ditulis sebagai: {brand['product_link_placeholder']}
-- Hashtag yang boleh dipakai: {", ".join(brand['hashtags'])}
-- Aturan promo: {brand['promo_rule']}
-- Dilarang: {"; ".join(brand['forbidden'])}
+- The product link is always written as: {brand['product_link_placeholder']}
+- Allowed hashtags: {", ".join(brand['hashtags'])}
+- Promo rule: {brand['promo_rule']}
+- Forbidden: {"; ".join(brand['forbidden'])}
 
-# KONTEKS SLOT WAKTU
-Ini untuk slot PRIME TIME {slot_label}. Sesuaikan rasa urgensi/bahasa dengan waktu tersebut
-(contoh: "mumpung siang ini masih ada voucher", "diskon kilat malam ini").
+# TIME SLOT CONTEXT
+This is for the PRIME TIME {slot_label} slot. Match the wording to that time of day
+(e.g. "grab one this morning", "before tonight"), but DO NOT invent offer mechanics
+(vouchers, coupons, deadlines, specific flash windows) that are not present in the data.
 
-# TUGAS
-Buat 3 format konten promo SIAP PAKAI berdasarkan DATA PENGGERAK di atas.
-WAJIB memakai angka persis dari data (nama produk, sisa stok, diskon %, rating, testimoni, jumlah order).
-DILARANG keras menambah/mengubah/mengarang angka atau klaim yang tidak ada di data.
+# TASK
+Write 3 ready-to-use promotional content formats based on the DRIVING DATA above.
+MUST use the exact figures from the data (product name, remaining stock, discount %,
+rating, testimonial, order counts). STRICTLY FORBIDDEN to add, change, or invent figures or
+claims that are not present in the data.
 {_anti_noise()}
 {_marker_example()}
 {extra}
@@ -79,27 +81,27 @@ def build_revision_prompt(
     context: dict[str, Any], slot: str, previous_draft: str, feedback: str
 ) -> str:
     return f"""
-Kamu adalah copywriter senior yang sedang REVISI draft berdasarkan masukan reviewer.
+You are a senior copywriter revising a draft based on the reviewer's feedback.
 
-# DATA PENGGERAK (sumber angka wajib)
+# DRIVING DATA (mandatory source of figures)
 {_context_json(context)}
 
 # SLOT
 PRIME TIME {settings.slot_label(slot)}
 
-# DRAFT SEBELUMNYA
+# PREVIOUS DRAFT
 {previous_draft}
 
-# MASUKAN REVIEWER
+# REVIEWER FEEDBACK
 {feedback}
 
-# TUGAS
-Tulis ulang 3 format konten dengan memperbaiki seluruh masukan reviewer.
+# TASK
+Rewrite the 3 content formats and address every point in the feedback.
 {_anti_noise()}
-Format WAJIB persis seperti contoh:
+Use EXACTLY this format:
 {_marker_example()}
 
-Angka promosi tetap harus akurat dengan DATA PENGGERAK.
+Promo figures must still match the DRIVING DATA.
 """.strip()
 
 
@@ -108,8 +110,8 @@ def build_copywriter_agent() -> Agent:
         name="copywriter",
         model=build_llm(settings),
         instruction=(
-            "Kamu adalah copywriter konten promosi UMKM fashion Indonesia. "
-            "Output hanya blok [TIKTOK]/[FEED]/[BROADCAST] beserta isinya, tanpa teks lain."
+            "You are a copywriter for UMKM fashion promotional content. "
+            "Output only the [TIKTOK]/[FEED]/[BROADCAST] blocks with their content, nothing else."
         ),
     )
 

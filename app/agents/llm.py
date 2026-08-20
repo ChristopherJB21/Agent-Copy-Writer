@@ -15,11 +15,11 @@ USER_ID = "seller"
 
 
 def build_llm(settings: Settings) -> LiteLlm:
-    """Bangun LiteLlm untuk endpoint OpenAI-compatible (9Router).
+    """Build LiteLlm for an OpenAI-compatible endpoint (e.g. 9Router).
 
-    Kwargs diteruskan langsung ke litellm.completion: api_base + api_key + max_tokens.
-    Model non-slash diberi prefix 'openai/' agar litellm merutekan via api_base
-    (nama model tetap dikirim polos di body request).
+    Kwargs are passed straight to litellm.completion: api_base + api_key + max_tokens.
+    A model without "/" is prefixed with "openai/" so litellm routes it through api_base
+    (the bare model name is still sent in the request body).
     """
     kwargs: dict[str, Any] = {
         "api_base": settings.llm_base_url,
@@ -35,11 +35,9 @@ def build_llm(settings: Settings) -> LiteLlm:
 
 
 async def run_agent(agent: Agent, prompt: str, session_id: str = "default") -> str:
-    """Jalankan agent ADK sekali (sesi in-memory), kembalikan seluruh teks yang dihasilkan."""
+    """Run an ADK agent once (in-memory session); return all generated text."""
     session_service = InMemorySessionService()
-    await session_service.create_session(
-        app_name=APP_NAME, user_id=USER_ID, session_id=session_id
-    )
+    await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=session_id)
     runner = Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
     message = genai_types.Content(role="user", parts=[genai_types.Part(text=prompt)])
 
