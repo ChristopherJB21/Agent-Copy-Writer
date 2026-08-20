@@ -1,0 +1,28 @@
+[project]
+name = "agent-copy-writer"
+version = "0.1.0"
+description = "MVP AI Marketing Copilot: multi-agent copywriter pipeline (Google ADK) generating TikTok/Feed/Broadcast promos from PostgreSQL data, delivering via Telegram."
+readme = "README.md"
+requires-python = ">=3.13,<3.15"
+dependencies = [
+    "google-adk",
+    "litellm",
+    "psycopg[binary]",
+    "python-telegram-bot>=21",
+    "python-dotenv",
+    "tabulate",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["outputs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501"]

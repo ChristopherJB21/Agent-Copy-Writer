@@ -1,0 +1,10 @@
+# Runtime dependencies (companion file to pyproject.toml — `uv sync` reads pyproject)
+google-adk
+litellm
+psycopg[binary]
+python-telegram-bot>=21
+python-dotenv
+tabulate
+
+# Dev
+ruff

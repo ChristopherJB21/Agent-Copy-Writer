@@ -1,0 +1,18 @@
+# Env & secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.pytest_cache/
+
+# Output artifacts (dry-run archive & salinan pesan)
+outputs/
+
+.kilo/
+
+*.md
+
+graphify-out/
