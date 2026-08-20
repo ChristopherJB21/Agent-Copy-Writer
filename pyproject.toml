@@ -17,6 +17,7 @@ dependencies = [
 dev = [
     "ruff",
     "black",
+    "python-pptx>=1.0.2",
 ]
 
 [tool.black]
