@@ -17,14 +17,15 @@ USER_ID = "seller"
 def build_llm(settings: Settings) -> LiteLlm:
     """Bangun LiteLlm untuk endpoint OpenAI-compatible (9Router).
 
-    Kwargs diteruskan langsung ke litellm.completion (lihat implementasi LiteLlm
-    di google.adk): api_base + api_key + max_tokens. Model non-slash diberi prefix
-    'openai/' agar litellm merutekan via api_base (nama model tetap dikirim polos).
+    Kwargs diteruskan langsung ke litellm.completion: api_base + api_key + max_tokens.
+    Model non-slash diberi prefix 'openai/' agar litellm merutekan via api_base
+    (nama model tetap dikirim polos di body request).
     """
     kwargs: dict[str, Any] = {
         "api_base": settings.llm_base_url,
         "api_key": settings.llm_api_key,
         "max_tokens": settings.llm_max_tokens,
+        "temperature": 0.3,
         "drop_params": True,
     }
     model = settings.llm_model
