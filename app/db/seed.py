@@ -174,6 +174,7 @@ async def _seed_inventory() -> dict[str, int]:
                 _iso_ago(days=sku["listed_days_ago"]),
             ),
         )
+        assert row is not None, "INSERT ... RETURNING must return a row"
         sku_ids[sku["sku_code"]] = row["sku_id"]
     return sku_ids
 

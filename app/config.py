@@ -13,7 +13,7 @@ OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 
 VALID_SLOTS = ("morning", "evening", "night")
 
-DEFAULT_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/marketing_copilot"
+DEFAULT_DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:5432/marketing_copilot"
 
 
 def _env(key: str, default: str = "") -> str:

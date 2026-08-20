@@ -203,6 +203,7 @@ async def run_pipeline(slot: str = "morning", dry_run: bool = False) -> dict[str
     revision_attempts = 0
     final_draft = drafts
     approved = False
+    round_no = 0
 
     for round_no in range(1, MAX_REVIEW_ROUNDS + 1):
         joined = "\n\n".join(final_draft[k].strip() for k in ("tiktok", "feed", "broadcast"))

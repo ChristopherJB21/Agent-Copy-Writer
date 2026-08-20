@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, cast
 
 import psycopg
 from psycopg.rows import dict_row
 
 from app.config import settings
+
+Connection = psycopg.AsyncConnection[dict[str, Any]]
 
 
 class DbPool:
@@ -16,36 +19,40 @@ class DbPool:
     def __init__(self, conninfo: str, min_size: int = 1, max_size: int = 5) -> None:
         self._conninfo = conninfo
         self._max_size = max_size
-        self._queue: asyncio.Queue[psycopg.AsyncConnection] = asyncio.Queue(maxsize=max_size)
+        self._queue: asyncio.Queue[Connection] = asyncio.Queue(maxsize=max_size)
         self._size = 0
         self._lock = asyncio.Lock()
 
-    async def _create(self) -> psycopg.AsyncConnection:
+    async def _create(self) -> Connection:
         async with self._lock:
             self._size += 1
         try:
-            return await psycopg.AsyncConnection.connect(
-                self._conninfo,
-                autocommit=True,
-                row_factory=dict_row,
+            conn = cast(
+                Connection,
+                await psycopg.AsyncConnection.connect(
+                    self._conninfo,
+                    autocommit=True,
+                    row_factory=dict_row,  # pyright: ignore[reportArgumentType]
+                ),
             )
+            return conn
         except Exception:
             async with self._lock:
                 self._size -= 1
             raise
 
-    async def acquire(self) -> psycopg.AsyncConnection:
+    async def acquire(self) -> Connection:
         if self._queue.empty() and self._size < self._max_size:
             return await self._create()
         return await self._queue.get()
 
-    def release(self, conn: psycopg.AsyncConnection) -> None:
+    def release(self, conn: Connection) -> None:
         try:
             self._queue.put_nowait(conn)
         except asyncio.QueueFull:  # pragma: no cover - pool full safety path
             self._schedule_close(conn)
 
-    def _schedule_close(self, conn: psycopg.AsyncConnection) -> None:
+    def _schedule_close(self, conn: Connection) -> None:
         async def _closer() -> None:
             async with self._lock:
                 self._size -= 1
@@ -61,7 +68,7 @@ class DbPool:
             self._size = 0
 
     @asynccontextmanager
-    async def cursor(self) -> Any:
+    async def cursor(self) -> AsyncIterator[Connection]:
         conn = await self.acquire()
         try:
             yield conn
@@ -75,7 +82,7 @@ pool = DbPool(settings.database_url)
 async def fetch_all(sql: str, params: tuple[Any, ...] | None = None) -> list[dict[str, Any]]:
     async with pool.cursor() as conn:
         async with conn.cursor() as cur:
-            await cur.execute(sql, params)
+            await cur.execute(sql, params)  # pyright: ignore[reportArgumentType]
             return await cur.fetchall()
 
 
@@ -87,7 +94,7 @@ async def fetch_one(sql: str, params: tuple[Any, ...] | None = None) -> dict[str
 async def execute(sql: str, params: tuple[Any, ...] | None = None) -> None:
     async with pool.cursor() as conn:
         async with conn.cursor() as cur:
-            await cur.execute(sql, params)
+            await cur.execute(sql, params)  # pyright: ignore[reportArgumentType]
 
 
 async def close_pool() -> None:

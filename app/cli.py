@@ -115,14 +115,22 @@ async def _main(argv: list[str] | None = None) -> None:
         await close_pool()
 
 
+def _force_utf8_stdio() -> None:
+    """Reconfigure stdout/stderr to UTF-8 so emoji print cleanly on Windows."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except Exception:  # pragma: no cover - exotic streams (e.g. test runner)
+            pass
+
+
 def main() -> None:
     import selectors
 
-    for stream in (sys.stdout, sys.stderr):
-        try:
-            stream.reconfigure(encoding="utf-8", errors="replace")
-        except Exception:  # pragma: no cover - stream without reconfigure (e.g. test runner)
-            pass
+    _force_utf8_stdio()
     asyncio.run(
         _main(),
         loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector()),

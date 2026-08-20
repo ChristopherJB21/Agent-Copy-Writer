@@ -101,12 +101,9 @@ async def get_rating(sku_id: int) -> dict[str, Any]:
     return row if row else {"total_reviews": 0, "avg_rating": None}
 
 
-def _to_number(value: Any) -> int | float:
-    if value is None:
-        return 0
-    if isinstance(value, (int, float)):
-        return value
-    return int(value)
+def _sku_id(row: dict[str, Any]) -> int:
+    """The sku_id column is always an integer in this schema."""
+    return int(row["sku_id"])
 
 
 async def build_context() -> dict[str, Any]:
@@ -147,6 +144,6 @@ async def _select_primary(
             "Run 'uv run python -m app.cli seed' first."
         )
 
-    reviews = await get_social_proof(_to_number(primary["sku_id"]))
-    rating = await get_rating(_to_number(primary["sku_id"]))
+    reviews = await get_social_proof(_sku_id(primary))
+    rating = await get_rating(_sku_id(primary))
     return primary, reviews, rating
