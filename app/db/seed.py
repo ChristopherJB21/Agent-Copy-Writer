@@ -10,7 +10,7 @@ SEED_RANDOM_SEED = 42
 
 SKU_DEFS: list[dict] = [
     {
-        "sku_code": "KEMEJA-LINEN",
+        "sku_code": "LINEN-SHIRT",
         "product_name": "Premium Linen Shirt",
         "category": "Shirt",
         "unit_price": "149000",
@@ -22,7 +22,7 @@ SKU_DEFS: list[dict] = [
         "plan_24h_orders": 0,
     },
     {
-        "sku_code": "KAOS-PREMIUM",
+        "sku_code": "PREMIUM-TEE",
         "product_name": "Premium Combed Cotton 30s Tee",
         "category": "Tee",
         "unit_price": "89000",
@@ -34,7 +34,7 @@ SKU_DEFS: list[dict] = [
         "plan_24h_orders": 9,
     },
     {
-        "sku_code": "KEMEJA-OXFORD",
+        "sku_code": "OXFORD-SHIRT",
         "product_name": "Slim Fit Oxford Shirt",
         "category": "Shirt",
         "unit_price": "139000",
@@ -46,7 +46,7 @@ SKU_DEFS: list[dict] = [
         "plan_24h_orders": 3,
     },
     {
-        "sku_code": "CELANA-CHINO",
+        "sku_code": "CHINO-PANTS",
         "product_name": "Relaxed Fit Chino Pants",
         "category": "Pants",
         "unit_price": "159000",
@@ -58,7 +58,7 @@ SKU_DEFS: list[dict] = [
         "plan_24h_orders": 4,
     },
     {
-        "sku_code": "DRESS-VNECK",
+        "sku_code": "VNECK-DRESS",
         "product_name": "A-Line V-Neck Dress",
         "category": "Dress",
         "unit_price": "179000",
@@ -70,7 +70,7 @@ SKU_DEFS: list[dict] = [
         "plan_24h_orders": 2,
     },
     {
-        "sku_code": "HOODIE-OVERSIZE",
+        "sku_code": "OVERSIZE-HOODIE",
         "product_name": "Heavyweight Oversize Hoodie",
         "category": "Outerwear",
         "unit_price": "199000",
@@ -82,7 +82,7 @@ SKU_DEFS: list[dict] = [
         "plan_24h_orders": 1,
     },
     {
-        "sku_code": "BLOUSE-RAYON",
+        "sku_code": "RAYON-BLOUSE",
         "product_name": "White Rayon Blouse",
         "category": "Blouse",
         "unit_price": "129000",
@@ -96,13 +96,13 @@ SKU_DEFS: list[dict] = [
 ]
 
 SKU_REVIEWS: dict[str, list[tuple[str, int, str, int]]] = {
-    "KEMEJA-LINEN": [
+    "LINEN-SHIRT": [
         ("Sari A.", 5, "Breathable and doesn't wrinkle easily - it stays neat all day", 1),
         ("Budi P.", 5, "No wonder it has 5 stars! It's really comfortable for work", 3),
         ("Rina M.", 5, "Premium linen texture and the colors are lovely. Recommended!", 6),
         ("Dewi K.", 5, "It's great, but the size runs a bit big for me", 9),
     ],
-    "KAOS-PREMIUM": [
+    "PREMIUM-TEE": [
         (
             "Andi R.",
             5,
@@ -113,27 +113,27 @@ SKU_REVIEWS: dict[str, list[tuple[str, int, str, int]]] = {
         ("Fajar N.", 5, "Great quality for the price, I'll buy again", 4),
         ("Intan W.", 4, "Good, but the stitching is a bit tight around the neck", 7),
     ],
-    "KEMEJA-OXFORD": [
+    "OXFORD-SHIRT": [
         ("Gilang T.", 5, "My go-to for work; it's thick but still comfortable to wear", 1),
         ("Putri L.", 5, "The slim fit hugs the body just right without pulling. Recommended", 3),
         ("Rizky A.", 5, "Perfect for formal office events, premium quality", 5),
     ],
-    "CELANA-CHINO": [
+    "CHINO-PANTS": [
         ("Yoga K.", 5, "Looks neat when worn, great drape", 2),
         ("Nadia F.", 5, "Thick fabric that doesn't wrinkle easily, worth it", 4),
         ("Dimas H.", 5, "Standard size, no alterations needed. Great for hanging out", 6),
     ],
-    "DRESS-VNECK": [
+    "VNECK-DRESS": [
         ("Rara P.", 5, "The cut is so pretty and it breathes well all day", 1),
         ("Tasya M.", 5, "An instant favorite! The color matches the photos", 3),
         ("Nita D.", 5, "Neat stitching, nice drape, I'll get another color", 5),
     ],
-    "HOODIE-OVERSIZE": [
+    "OVERSIZE-HOODIE": [
         ("Kevin S.", 5, "Heavy and thick, just right for cold weather", 2),
         ("Ayu B.", 5, "The oversize fit is perfect and the color is quite rare", 4),
         ("Bagas D.", 5, "Quality matches expensive brands. Great", 6),
     ],
-    "BLOUSE-RAYON": [
+    "RAYON-BLOUSE": [
         ("Cantika R.", 5, "Breathable and flowy, great for the office or hanging out", 1),
         ("Laras W.", 5, "The rayon drapes beautifully and isn't see-through. Very satisfied!", 3),
         ("Salsa E.", 5, "Super breathable fabric with neat stitching. Recommended", 5),
